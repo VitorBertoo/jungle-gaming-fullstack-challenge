@@ -1,12 +1,24 @@
 import "reflect-metadata";
 import { NestFactory } from "@nestjs/core";
+import { MicroserviceOptions, Transport } from "@nestjs/microservices";
 import { AppModule } from "./app.module";
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
-  const port = process.env.PORT;
-  await app.listen(port, "0.0.0.0");
-  console.log(`Wallets service running on port ${port}`);
+
+  app.connectMicroservice<MicroserviceOptions>({
+    transport: Transport.RMQ,
+    options: {
+      urls: [process.env.RABBITMQ_URL!],
+      queue: "wallet_events_queue",
+      queueOptions: { durable: true },
+      noAck: false,
+    },
+  });
+
+  await app.startAllMicroservices();
+  await app.listen(process.env.PORT!, "0.0.0.0");
+  console.log(`Wallets service running on port ${process.env.PORT}`);
 }
 
 bootstrap();
