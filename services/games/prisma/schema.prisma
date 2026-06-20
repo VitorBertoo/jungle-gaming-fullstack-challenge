@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum RoundStatus {
+  BETTING
+  RUNNING
+  CRASHED
+}
+
+enum BetStatus {
+  PENDING_DEBIT
+  ACTIVE
+  CASHED_OUT
+  WON
+  LOST
+  CANCELLED
+}
+
+model Round {
+  id                   String      @id @default(uuid())
+  status               RoundStatus @default(BETTING)
+  serverSeed           String      @map("server_seed")
+  serverSeedHash       String      @map("server_seed_hash")
+  nonce                Int
+  crashPointMultiplier Int         @map("crash_point_multiplier")
+  bettingEndsAt        DateTime    @map("betting_ends_at")
+  startedAt            DateTime?   @map("started_at")
+  crashedAt            DateTime?   @map("crashed_at")
+  createdAt            DateTime    @default(now()) @map("created_at")
+  updatedAt            DateTime    @updatedAt @map("updated_at")
+
+  bets Bet[]
+
+  @@map("rounds")
+}
+
+model Bet {
+  id                  String    @id @default(uuid())
+  roundId             String    @map("round_id")
+  playerId            String    @map("player_id")
+  amountInCents       BigInt    @map("amount_in_cents")
+  status              BetStatus @default(PENDING_DEBIT)
+  cashOutMultiplier   Int?      @map("cash_out_multiplier")
+  payoutInCents       BigInt?   @map("payout_in_cents")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+
+  round Round @relation(fields: [roundId], references: [id])
+
+  @@unique([roundId, playerId])
+  @@map("bets")
+}

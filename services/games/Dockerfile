@@ -5,8 +5,11 @@ WORKDIR /app
 COPY package.json ./
 RUN bun install
 
+COPY prisma ./prisma
+RUN bunx prisma generate
+
 COPY . .
 
 EXPOSE 4001
 
-CMD ["bun", "run", "src/main.ts"]
+CMD bunx prisma migrate deploy && bun run src/main.ts

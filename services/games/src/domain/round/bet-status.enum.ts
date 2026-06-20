@@ -1,0 +1,8 @@
+export enum BetStatus {
+  PENDING_DEBIT = "PENDING_DEBIT",
+  ACTIVE = "ACTIVE",
+  CASHED_OUT = "CASHED_OUT",
+  WON = "WON",
+  LOST = "LOST",
+  CANCELLED = "CANCELLED",
+}
