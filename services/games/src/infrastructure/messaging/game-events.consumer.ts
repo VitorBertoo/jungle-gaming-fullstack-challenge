@@ -1,9 +1,7 @@
 import { Controller, Inject, Logger } from "@nestjs/common";
 import { EventPattern, Payload } from "@nestjs/microservices";
-import {
-  IRoundRepository,
-  ROUND_REPOSITORY,
-} from "@/domain/round/round.repository.interface";
+import type { IRoundRepository } from "@/domain/round/round.repository.interface";
+import { ROUND_REPOSITORY } from "@/domain/round/round.repository.interface";
 import { BetStatus } from "@/domain/round/bet-status.enum";
 
 interface WalletDebitedPayload {

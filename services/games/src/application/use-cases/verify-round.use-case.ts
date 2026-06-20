@@ -1,8 +1,6 @@
 import { Inject, Injectable, NotFoundException } from "@nestjs/common";
-import {
-  IRoundRepository,
-  ROUND_REPOSITORY,
-} from "@/domain/round/round.repository.interface";
+import type { IRoundRepository } from "@/domain/round/round.repository.interface";
+import { ROUND_REPOSITORY } from "@/domain/round/round.repository.interface";
 import { computeCrashPoint, hashServerSeed } from "@/domain/provably-fair/provably-fair";
 
 export interface VerifyRoundResult {

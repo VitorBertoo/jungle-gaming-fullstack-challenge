@@ -17,6 +17,7 @@
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.1.17",
     "@prisma/client": "^6.9.0",
+    "amqp-connection-manager": "^4.1.14",
     "amqplib": "^0.10.5",
     "jwks-rsa": "^3.2.0",
     "passport": "^0.7.0",

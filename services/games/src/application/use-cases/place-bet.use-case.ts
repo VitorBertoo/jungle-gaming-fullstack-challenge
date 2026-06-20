@@ -1,10 +1,8 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { randomUUID } from "crypto";
 import { Bet } from "@/domain/round/bet.entity";
-import {
-  IRoundRepository,
-  ROUND_REPOSITORY,
-} from "@/domain/round/round.repository.interface";
+import type { IRoundRepository } from "@/domain/round/round.repository.interface";
+import { ROUND_REPOSITORY } from "@/domain/round/round.repository.interface";
 import { RoundNotInBettingPhaseError } from "@/domain/round/errors/round-not-in-betting-phase.error";
 
 export interface PlaceBetCommand {

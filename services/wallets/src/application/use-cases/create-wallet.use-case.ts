@@ -1,10 +1,8 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { randomUUID } from "crypto";
 import { Wallet } from "@/domain/wallet.entity";
-import {
-  IWalletRepository,
-  WALLET_REPOSITORY,
-} from "@/domain/wallet.repository.interface";
+import type { IWalletRepository } from "@/domain/wallet.repository.interface";
+import { WALLET_REPOSITORY } from "@/domain/wallet.repository.interface";
 import { WalletAlreadyExistsError } from "@/domain/errors/wallet-already-exists.error";
 
 @Injectable()

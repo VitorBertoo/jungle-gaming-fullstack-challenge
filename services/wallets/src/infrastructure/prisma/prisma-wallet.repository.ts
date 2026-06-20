@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { Wallet } from "@/domain/wallet.entity";
-import { IWalletRepository } from "@/domain/wallet.repository.interface";
+import type { IWalletRepository } from "@/domain/wallet.repository.interface";
 import { PrismaService } from "./prisma.service";
 
 @Injectable()

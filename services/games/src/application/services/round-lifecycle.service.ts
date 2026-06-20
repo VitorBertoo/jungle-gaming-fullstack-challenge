@@ -1,10 +1,8 @@
 import { Inject, Injectable, Logger, OnApplicationBootstrap } from "@nestjs/common";
 import { randomUUID } from "crypto";
 import { Round } from "@/domain/round/round.entity";
-import {
-  IRoundRepository,
-  ROUND_REPOSITORY,
-} from "@/domain/round/round.repository.interface";
+import type { IRoundRepository } from "@/domain/round/round.repository.interface";
+import { ROUND_REPOSITORY } from "@/domain/round/round.repository.interface";
 import {
   generateServerSeed,
   hashServerSeed,

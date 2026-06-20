@@ -1,9 +1,7 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { Round } from "@/domain/round/round.entity";
-import {
-  IRoundRepository,
-  ROUND_REPOSITORY,
-} from "@/domain/round/round.repository.interface";
+import type { IRoundRepository } from "@/domain/round/round.repository.interface";
+import { ROUND_REPOSITORY } from "@/domain/round/round.repository.interface";
 
 @Injectable()
 export class GetCurrentRoundUseCase {

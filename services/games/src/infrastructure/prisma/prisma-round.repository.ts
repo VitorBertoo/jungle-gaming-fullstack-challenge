@@ -3,7 +3,7 @@ import { Round } from "@/domain/round/round.entity";
 import { Bet } from "@/domain/round/bet.entity";
 import { RoundStatus } from "@/domain/round/round-status.enum";
 import { BetStatus } from "@/domain/round/bet-status.enum";
-import {
+import type {
   IRoundRepository,
   PaginatedRounds,
   PaginatedBets,

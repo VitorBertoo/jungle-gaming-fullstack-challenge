@@ -1,9 +1,7 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { Wallet } from "@/domain/wallet.entity";
-import {
-  IWalletRepository,
-  WALLET_REPOSITORY,
-} from "@/domain/wallet.repository.interface";
+import type { IWalletRepository } from "@/domain/wallet.repository.interface";
+import { WALLET_REPOSITORY } from "@/domain/wallet.repository.interface";
 import { WalletNotFoundError } from "@/domain/errors/wallet-not-found.error";
 
 @Injectable()

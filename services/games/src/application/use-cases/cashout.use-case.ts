@@ -1,9 +1,7 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { Bet } from "@/domain/round/bet.entity";
-import {
-  IRoundRepository,
-  ROUND_REPOSITORY,
-} from "@/domain/round/round.repository.interface";
+import type { IRoundRepository } from "@/domain/round/round.repository.interface";
+import { ROUND_REPOSITORY } from "@/domain/round/round.repository.interface";
 import { RoundNotInRunningPhaseError } from "@/domain/round/errors/round-not-in-running-phase.error";
 import { computeCurrentMultiplier } from "@/domain/provably-fair/provably-fair";
 

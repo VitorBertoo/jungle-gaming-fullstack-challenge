@@ -1,9 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
-import {
-  IRoundRepository,
-  PaginatedRounds,
-  ROUND_REPOSITORY,
-} from "@/domain/round/round.repository.interface";
+import type { IRoundRepository, PaginatedRounds } from "@/domain/round/round.repository.interface";
+import { ROUND_REPOSITORY } from "@/domain/round/round.repository.interface";
 
 export interface GetRoundHistoryQuery {
   page: number;
