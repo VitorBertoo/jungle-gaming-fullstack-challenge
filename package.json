@@ -7,7 +7,8 @@
     "frontend"
   ],
   "scripts": {
-    "docker:up": "docker compose up --build",
+    "env:init": "bash scripts/init-env.sh",
+    "docker:up": "bun run env:init && docker compose up --build",
     "docker:down": "docker compose down",
     "docker:prune": "docker compose down -v --rmi all --remove-orphans && docker volume prune -f"
   },
