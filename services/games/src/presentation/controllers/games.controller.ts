@@ -94,7 +94,7 @@ export class GamesController {
       limit: Math.min(100, Math.max(1, parseInt(limit))),
     });
     return {
-      data: result.rounds.map((r) => this.toRoundDto(r)),
+      rounds: result.rounds.map((r) => this.toRoundDto(r)),
       total: result.total,
       page: result.page,
       limit: result.limit,

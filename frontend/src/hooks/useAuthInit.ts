@@ -32,14 +32,19 @@ export function useAuthInit() {
       try {
         let user = await userManager.getUser();
 
-        if (!user || user.expired) {
-          // Try silent renew before giving up
+        if (user?.expired) {
+          // Token expired but a Keycloak session cookie might still be valid —
+          // attempt a silent renew via hidden iframe.
           try {
             user = await userManager.signinSilent();
           } catch {
-            // No valid session — user must log in
+            // Session fully expired — user must log in
+            user = null;
           }
         }
+        // If user is null (no stored session at all), skip silent renew entirely.
+        // Attempting it when there is no session causes a several-second iframe
+        // timeout before the app shows the login page.
 
         applyUser(user);
       } catch {
