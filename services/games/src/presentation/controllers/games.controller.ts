@@ -14,6 +14,14 @@ import {
   HttpCode,
   HttpStatus,
 } from "@nestjs/common";
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiQuery,
+  ApiParam,
+} from "@nestjs/swagger";
 import { JwtAuthGuard } from "@/infrastructure/auth/jwt-auth.guard";
 import { AuthenticatedPlayer } from "@/infrastructure/auth/jwt.strategy";
 import { WalletEventsPublisher } from "@/infrastructure/messaging/wallet-events.publisher";
@@ -43,6 +51,7 @@ interface RequestWithPlayer extends Request {
   user: AuthenticatedPlayer;
 }
 
+@ApiTags("Games")
 @Controller()
 export class GamesController {
   constructor(
@@ -57,17 +66,25 @@ export class GamesController {
   ) {}
 
   @Get("health")
+  @ApiOperation({ summary: "Health check" })
+  @ApiResponse({ status: 200, description: "Service is healthy", type: HealthCheckResponseDto })
   check(): HealthCheckResponseDto {
     return { status: "ok", service: "games" };
   }
 
   @Get("rounds/current")
+  @ApiOperation({ summary: "Get current round", description: "Returns the active round with all bets. Crash point is hidden until the round crashes." })
+  @ApiResponse({ status: 200, description: "Current round state", type: RoundResponseDto })
   async getCurrent(): Promise<RoundResponseDto | null> {
     const round = await this.getCurrentRound.execute();
     return round ? this.toRoundDto(round) : null;
   }
 
   @Get("rounds/history")
+  @ApiOperation({ summary: "Get round history", description: "Paginated list of completed rounds, most recent first." })
+  @ApiQuery({ name: "page", required: false, example: 1 })
+  @ApiQuery({ name: "limit", required: false, example: 20 })
+  @ApiResponse({ status: 200, description: "Paginated round history" })
   async getHistory(
     @Query("page") page = "1",
     @Query("limit") limit = "20",
@@ -85,12 +102,25 @@ export class GamesController {
   }
 
   @Get("rounds/:roundId/verify")
+  @ApiOperation({
+    summary: "Verify round provably fair",
+    description: "Reveals the server seed for a completed round so players can independently verify the crash point. Only available after the round has crashed.",
+  })
+  @ApiParam({ name: "roundId", description: "UUID of the completed round" })
+  @ApiResponse({ status: 200, description: "Provably fair verification data", type: VerifyRoundResponseDto })
+  @ApiResponse({ status: 404, description: "Round not found or not yet crashed" })
   async verify(@Param("roundId") roundId: string): Promise<VerifyRoundResponseDto> {
     return this.verifyRound.execute(roundId);
   }
 
   @Get("bets/me")
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Get my bet history", description: "Paginated list of the authenticated player's bets across all rounds." })
+  @ApiQuery({ name: "page", required: false, example: 1 })
+  @ApiQuery({ name: "limit", required: false, example: 20 })
+  @ApiResponse({ status: 200, description: "Paginated bet history" })
+  @ApiResponse({ status: 401, description: "Unauthorized" })
   async getMyBets(
     @Request() req: RequestWithPlayer,
     @Query("page") page = "1",
@@ -111,7 +141,17 @@ export class GamesController {
 
   @Post("bet")
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: "Place a bet",
+    description: "Places a bet on the current round during the BETTING phase. The wallet debit is processed asynchronously via RabbitMQ — listen for the `bet:cancelled` WebSocket event if the debit fails.",
+  })
+  @ApiResponse({ status: 201, description: "Bet accepted (debit pending)", type: BetResponseDto })
+  @ApiResponse({ status: 400, description: "Invalid amount (must be 100–100 000 cents)" })
+  @ApiResponse({ status: 401, description: "Unauthorized" })
+  @ApiResponse({ status: 409, description: "Player already has a bet in this round" })
+  @ApiResponse({ status: 422, description: "Round is not in the BETTING phase" })
   async placeBet(
     @Request() req: RequestWithPlayer,
     @Body() dto: PlaceBetDto,
@@ -149,7 +189,17 @@ export class GamesController {
 
   @Post("bet/cashout")
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: "Cash out",
+    description: "Cashes out the player's active bet at the current multiplier. The wallet credit is processed synchronously.",
+  })
+  @ApiResponse({ status: 200, description: "Cashed out successfully", type: BetResponseDto })
+  @ApiResponse({ status: 401, description: "Unauthorized" })
+  @ApiResponse({ status: 404, description: "No active bet in the current round" })
+  @ApiResponse({ status: 409, description: "Already cashed out" })
+  @ApiResponse({ status: 422, description: "Round is not in the RUNNING phase" })
   async cashout(@Request() req: RequestWithPlayer): Promise<BetResponseDto> {
     try {
       const bet = await this.cashoutUseCase.execute({ playerId: req.user.sub });

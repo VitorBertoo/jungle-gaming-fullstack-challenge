@@ -17,6 +17,7 @@
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.1.17",
     "@nestjs/platform-socket.io": "^11.1.17",
+    "@nestjs/swagger": "^11.4.4",
     "@nestjs/websockets": "^11.1.17",
     "@prisma/client": "^6.9.0",
     "amqp-connection-manager": "^4.1.14",
