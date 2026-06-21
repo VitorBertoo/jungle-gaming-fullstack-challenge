@@ -4,6 +4,7 @@ import { useSocket } from "@/hooks/useSocket";
 import { logout } from "@/services/auth.service";
 import { formatCents } from "@/lib/utils";
 import { CrashGraph } from "@/components/CrashGraph";
+import { BetControls } from "@/components/BetControls";
 
 export default function GamePage() {
   const username = useAuthStore((s) => s.username);
@@ -53,9 +54,9 @@ export default function GamePage() {
             <CrashGraph />
           </div>
 
-          {/* Bet controls — step 6 */}
-          <div className="shrink-0 h-32 border-t border-border bg-card flex items-center justify-center">
-            <p className="text-muted-foreground text-sm">Bet controls — coming next</p>
+          {/* Bet controls */}
+          <div className="shrink-0 h-32 border-t border-border bg-card">
+            <BetControls />
           </div>
         </div>
 

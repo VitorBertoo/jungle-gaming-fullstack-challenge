@@ -5,7 +5,9 @@ interface AuthState {
   accessToken: string | null;
   refreshToken: string | null;
   username: string | null;
-  setTokens: (accessToken: string, refreshToken: string, username: string) => void;
+  /** Keycloak `sub` claim — used by the backend as playerId */
+  playerId: string | null;
+  setTokens: (accessToken: string, refreshToken: string, username: string, playerId: string) => void;
   clearTokens: () => void;
 }
 
@@ -15,18 +17,19 @@ export const useAuthStore = create<AuthState>()(
       accessToken: null,
       refreshToken: null,
       username: null,
-      setTokens: (accessToken, refreshToken, username) =>
-        set({ accessToken, refreshToken, username }),
+      playerId: null,
+      setTokens: (accessToken, refreshToken, username, playerId) =>
+        set({ accessToken, refreshToken, username, playerId }),
       clearTokens: () =>
-        set({ accessToken: null, refreshToken: null, username: null }),
+        set({ accessToken: null, refreshToken: null, username: null, playerId: null }),
     }),
     {
       name: "crash-auth",
-      // Only persist refresh token and username; access token is short-lived
       partialize: (state) => ({
+        accessToken: state.accessToken,
         refreshToken: state.refreshToken,
         username: state.username,
-        accessToken: state.accessToken,
+        playerId: state.playerId,
       }),
     },
   ),

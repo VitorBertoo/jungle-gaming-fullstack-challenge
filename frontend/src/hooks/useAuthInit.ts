@@ -24,7 +24,8 @@ export function useAuthInit() {
       const username =
         (user.profile.preferred_username as string | undefined) ??
         (user.profile.sub as string);
-      setTokens(user.access_token, user.refresh_token ?? "", username);
+      const playerId = user.profile.sub as string;
+      setTokens(user.access_token, user.refresh_token ?? "", username, playerId);
     }
 
     async function init() {
