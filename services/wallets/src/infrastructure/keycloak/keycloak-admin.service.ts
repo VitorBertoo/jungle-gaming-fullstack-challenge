@@ -28,8 +28,7 @@ export class KeycloakAdminService {
 
   constructor() {
     const issuer = process.env.KEYCLOAK_ISSUER ?? "http://localhost:8080/realms/crash-game";
-    const realmIndex = issuer.indexOf("/realms/");
-    this.baseUrl = realmIndex !== -1 ? issuer.slice(0, realmIndex) : issuer;
+    this.baseUrl = process.env.KEYCLOAK_INTERNAL_URL ?? issuer.slice(0, issuer.indexOf("/realms/"));
     this.realm = issuer.split("/realms/")[1] ?? "crash-game";
   }
 

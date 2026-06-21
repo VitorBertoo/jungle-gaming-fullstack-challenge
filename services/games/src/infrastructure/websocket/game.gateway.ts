@@ -45,12 +45,14 @@ export class GameGateway implements OnGatewayInit {
     roundId: string,
     betId: string,
     playerId: string,
+    username: string,
     amountInCents: bigint,
   ): void {
     this.server.emit("bet:placed", {
       roundId,
       betId,
       playerId,
+      username,
       amountInCents: amountInCents.toString(),
     });
   }

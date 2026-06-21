@@ -7,6 +7,7 @@ export type RoundStatus = "BETTING" | "RUNNING" | "CRASHED";
 export interface LiveBet {
   betId: string;
   playerId: string;
+  username?: string;
   amountInCents: string;
   status: LiveBetStatus;
   cashOutMultiplier?: number;
@@ -41,6 +42,7 @@ export interface BetPlacedPayload {
   roundId: string;
   betId: string;
   playerId: string;
+  username?: string;
   amountInCents: string;
 }
 
@@ -148,6 +150,7 @@ export const useGameStore = create<GameState>()((set) => ({
             {
               betId: p.betId,
               playerId: p.playerId,
+              username: p.username,
               amountInCents: p.amountInCents,
               status: "PENDING_DEBIT" as LiveBetStatus,
             },
@@ -211,6 +214,7 @@ export const useGameStore = create<GameState>()((set) => ({
       bets: (round?.bets ?? []).map((b) => ({
         betId: b.id,
         playerId: b.playerId,
+        username: b.username,
         amountInCents: b.amountInCents,
         status: b.status as LiveBetStatus,
         cashOutMultiplier: b.cashOutMultiplier,

@@ -176,7 +176,7 @@ export class GamesController {
       });
 
       // Notify clients
-      await this.lifecycle.notifyBetPlaced(bet.roundId, bet.id, req.user.sub, bet.amountInCents);
+      await this.lifecycle.notifyBetPlaced(bet.roundId, bet.id, req.user.sub, req.user.username, bet.amountInCents);
 
       return this.toBetDto(bet);
     } catch (err) {

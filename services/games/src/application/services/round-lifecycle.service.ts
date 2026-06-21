@@ -23,7 +23,7 @@ export class RoundLifecycleService implements OnApplicationBootstrap {
     emitRoundBetting(round: Round): void;
     emitRoundStarted(round: Round): void;
     emitMultiplierTick(roundId: string, multiplierInt: number): void;
-    emitBetPlaced(roundId: string, betId: string, playerId: string, amountInCents: bigint): void;
+    emitBetPlaced(roundId: string, betId: string, playerId: string, username: string, amountInCents: bigint): void;
     emitBetCashout(roundId: string, betId: string, playerId: string, cashOutMultiplier: number, payoutInCents: bigint): void;
     emitRoundCrashed(round: Round): void;
   } | null = null;
@@ -123,8 +123,8 @@ export class RoundLifecycleService implements OnApplicationBootstrap {
     setTimeout(() => this.startBettingPhase(), POST_CRASH_DELAY_MS);
   }
 
-  async notifyBetPlaced(roundId: string, betId: string, playerId: string, amountInCents: bigint): Promise<void> {
-    this.gateway?.emitBetPlaced(roundId, betId, playerId, amountInCents);
+  async notifyBetPlaced(roundId: string, betId: string, playerId: string, username: string, amountInCents: bigint): Promise<void> {
+    this.gateway?.emitBetPlaced(roundId, betId, playerId, username, amountInCents);
   }
 
   async notifyCashout(

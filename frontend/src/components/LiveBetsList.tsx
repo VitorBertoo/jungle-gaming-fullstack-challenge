@@ -33,10 +33,9 @@ function statusBadge(bet: LiveBet, isMe: boolean) {
   }
 }
 
-function formatPlayerId(playerId: string, isMe: boolean): string {
+function formatPlayer(playerId: string, username: string | undefined, isMe: boolean): string {
   if (isMe) return "You";
-  // Show first 6 chars of the UUID
-  return playerId.slice(0, 6) + "…";
+  return username ?? playerId.slice(0, 6) + "…";
 }
 
 export function LiveBetsList() {
@@ -95,7 +94,7 @@ export function LiveBetsList() {
                   isMe ? "text-primary" : "text-foreground",
                 )}
               >
-                {formatPlayerId(bet.playerId, isMe)}
+                {formatPlayer(bet.playerId, bet.username, isMe)}
               </span>
               <span className="text-xs text-muted-foreground tabular-nums">
                 {formatCents(BigInt(bet.amountInCents))}
