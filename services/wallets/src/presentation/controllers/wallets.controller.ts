@@ -11,6 +11,13 @@ import {
   HttpCode,
   HttpStatus,
 } from "@nestjs/common";
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiBody,
+} from "@nestjs/swagger";
 import { randomUUID } from "crypto";
 import { JwtAuthGuard } from "@/infrastructure/auth/jwt-auth.guard";
 import { AuthenticatedPlayer } from "@/infrastructure/auth/jwt.strategy";
@@ -26,6 +33,7 @@ interface RequestWithPlayer extends Request {
   user: AuthenticatedPlayer;
 }
 
+@ApiTags("Wallets")
 @Controller()
 export class WalletsController {
   constructor(
@@ -35,13 +43,23 @@ export class WalletsController {
   ) {}
 
   @Get("health")
+  @ApiOperation({ summary: "Health check" })
+  @ApiResponse({ status: 200, description: "Service is healthy", type: HealthCheckResponseDto })
   check(): HealthCheckResponseDto {
     return { status: "ok", service: "wallets" };
   }
 
   @Post()
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: "Create wallet",
+    description: "Creates a wallet for the authenticated player with a $1,000 starting balance. Each player may only have one wallet.",
+  })
+  @ApiResponse({ status: 201, description: "Wallet created", type: WalletResponseDto })
+  @ApiResponse({ status: 401, description: "Unauthorized" })
+  @ApiResponse({ status: 409, description: "Wallet already exists for this player" })
   async create(@Request() req: RequestWithPlayer): Promise<WalletResponseDto> {
     try {
       const wallet = await this.createWallet.execute(req.user.sub);
@@ -56,6 +74,11 @@ export class WalletsController {
 
   @Get("me")
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Get my wallet", description: "Returns the authenticated player's wallet and current balance." })
+  @ApiResponse({ status: 200, description: "Wallet details", type: WalletResponseDto })
+  @ApiResponse({ status: 401, description: "Unauthorized" })
+  @ApiResponse({ status: 404, description: "Wallet not found — call POST /wallets first" })
   async getMe(@Request() req: RequestWithPlayer): Promise<WalletResponseDto> {
     try {
       const wallet = await this.getWallet.execute(req.user.sub);
@@ -68,13 +91,31 @@ export class WalletsController {
     }
   }
 
-  /**
-   * Top up the authenticated player's wallet.
-   * Body: { amountInCents?: number } — defaults to 100 000 ($1 000.00).
-   */
   @Post("topup")
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: "Top up wallet",
+    description: "Credits the authenticated player's wallet. Defaults to $1,000 (100 000 cents) if no amount is provided.",
+  })
+  @ApiBody({
+    schema: {
+      type: "object",
+      properties: {
+        amountInCents: {
+          type: "integer",
+          description: "Amount to credit in cents. Defaults to 100 000 ($1 000.00).",
+          example: 100000,
+          minimum: 1,
+        },
+      },
+    },
+  })
+  @ApiResponse({ status: 200, description: "Wallet credited — returns updated wallet", type: WalletResponseDto })
+  @ApiResponse({ status: 400, description: "amountInCents must be positive" })
+  @ApiResponse({ status: 401, description: "Unauthorized" })
+  @ApiResponse({ status: 404, description: "Wallet not found" })
   async topup(
     @Request() req: RequestWithPlayer,
     @Body() body: { amountInCents?: number },
