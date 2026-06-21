@@ -107,8 +107,8 @@ describe("GET /rounds/history", () => {
   it("returns a paginated list", async () => {
     const res = await fetch(`${BASE_URL}/rounds/history?page=1&limit=5`);
     expect(res.status).toBe(200);
-    const body = await res.json() as { data: unknown[]; total: number; page: number; limit: number };
-    expect(Array.isArray(body.data)).toBe(true);
+    const body = await res.json() as { rounds: unknown[]; total: number; page: number; limit: number };
+    expect(Array.isArray(body.rounds)).toBe(true);
     expect(typeof body.total).toBe("number");
     expect(body.page).toBe(1);
     expect(body.limit).toBe(5);
@@ -271,9 +271,9 @@ describe("Happy path: place bet → crash → lost", () => {
     // 4. Check round history contains this round
     const histRes = await fetch(`${BASE_URL}/rounds/history?limit=1`);
     expect(histRes.status).toBe(200);
-    const hist = await histRes.json() as { data: Record<string, unknown>[] };
-    expect(hist.data.length).toBeGreaterThan(0);
-    const lastRound = hist.data[0];
+    const hist = await histRes.json() as { rounds: Record<string, unknown>[] };
+    expect(hist.rounds.length).toBeGreaterThan(0);
+    const lastRound = hist.rounds[0];
     expect(lastRound.crashPointMultiplier).not.toBeNull();
 
     // 5. Verify round via provably fair endpoint

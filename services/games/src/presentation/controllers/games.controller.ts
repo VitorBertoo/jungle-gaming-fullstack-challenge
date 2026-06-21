@@ -88,7 +88,7 @@ export class GamesController {
   async getHistory(
     @Query("page") page = "1",
     @Query("limit") limit = "20",
-  ): Promise<{ data: RoundResponseDto[]; total: number; page: number; limit: number }> {
+  ): Promise<{ rounds: RoundResponseDto[]; total: number; page: number; limit: number }> {
     const result = await this.getRoundHistory.execute({
       page: Math.max(1, parseInt(page)),
       limit: Math.min(100, Math.max(1, parseInt(limit))),
