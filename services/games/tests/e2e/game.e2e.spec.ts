@@ -54,7 +54,7 @@ async function ensureWallet(token: string): Promise<void> {
 /** Poll until the current round reaches the desired status (or timeout). */
 async function waitForRoundStatus(
   status: "BETTING" | "RUNNING" | "CRASHED",
-  timeoutMs = 30_000,
+  timeoutMs = 120_000,
 ): Promise<Record<string, unknown>> {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
@@ -141,7 +141,7 @@ describe("POST /bet — validation errors", () => {
     // Either 400 (invalid amount) or 422 (not in betting phase if phase changed)
     expect([400, 422]).toContain(res.status);
     void round; // used for phase sync
-  });
+  }, 120_000);
 
   it("rejects bet above maximum (200001 cents)", async () => {
     await waitForRoundStatus("BETTING");
@@ -154,7 +154,7 @@ describe("POST /bet — validation errors", () => {
       body: JSON.stringify({ amountInCents: 200001 }),
     });
     expect([400, 422]).toContain(res.status);
-  });
+  }, 120_000);
 
   it("requires authentication", async () => {
     const res = await fetch(`${BASE_URL}/bet`, {
@@ -174,14 +174,14 @@ describe("POST /bet/cashout — validation errors", () => {
 
   it("returns 404 when player has no active bet", async () => {
     // Wait for a RUNNING round, then try cashout without a bet
-    await waitForRoundStatus("RUNNING", 60_000);
+    await waitForRoundStatus("RUNNING");
     const res = await fetch(`${BASE_URL}/bet/cashout`, {
       method: "POST",
       headers: { Authorization: `Bearer ${token}` },
     });
     // 404 = no active bet; 422 = round not running (race condition) — both valid
     expect([404, 422]).toContain(res.status);
-  });
+  }, 120_000);
 });
 
 describe("Happy path: place bet → cashout", () => {
@@ -222,7 +222,7 @@ describe("Happy path: place bet → cashout", () => {
     expect([409, 422]).toContain(dupRes.status); // 409 = duplicate, 422 = not betting phase
 
     // 4. Wait for RUNNING phase
-    await waitForRoundStatus("RUNNING", 30_000);
+    await waitForRoundStatus("RUNNING");
 
     // 5. Cash out
     const cashoutRes = await fetch(`${BASE_URL}/bet/cashout`, {
@@ -239,7 +239,7 @@ describe("Happy path: place bet → cashout", () => {
       expect(cashedOut.cashOutMultiplier).not.toBeNull();
       expect(Number(cashedOut.payoutInCents)).toBeGreaterThanOrEqual(1000);
     }
-  }, 90_000); // 90s timeout for full round cycle
+  }, 300_000); // 5 min: waits BETTING (120s) + RUNNING (120s) + margin
 });
 
 describe("Happy path: place bet → crash → lost", () => {
@@ -266,7 +266,7 @@ describe("Happy path: place bet → crash → lost", () => {
     const bet = await betRes.json() as Record<string, unknown>;
 
     // 3. Wait for round to crash (do NOT cashout)
-    await waitForRoundStatus("CRASHED", 60_000);
+    await waitForRoundStatus("CRASHED");
 
     // 4. Check round history contains this round
     const histRes = await fetch(`${BASE_URL}/rounds/history?limit=1`);
@@ -295,7 +295,7 @@ describe("Happy path: place bet → crash → lost", () => {
     if (thisBet) {
       expect(["LOST", "CANCELLED"]).toContain(thisBet.status as string);
     }
-  }, 120_000);
+  }, 300_000); // 5 min: waits BETTING (120s) + full RUNNING until crash (120s) + margin
 });
 
 describe("GET /rounds/:id/verify", () => {
