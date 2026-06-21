@@ -34,7 +34,7 @@ export class WalletsController {
     return { status: "ok", service: "wallets" };
   }
 
-  @Post("wallets")
+  @Post()
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.CREATED)
   async create(@Request() req: RequestWithPlayer): Promise<WalletResponseDto> {
@@ -49,7 +49,7 @@ export class WalletsController {
     }
   }
 
-  @Get("wallets/me")
+  @Get("me")
   @UseGuards(JwtAuthGuard)
   async getMe(@Request() req: RequestWithPlayer): Promise<WalletResponseDto> {
     try {
