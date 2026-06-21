@@ -13,8 +13,8 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 function AppSplash() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[--color-background]">
-      <span className="text-[--color-muted-foreground] text-sm animate-pulse">
+    <div className="min-h-screen flex items-center justify-center bg-background">
+      <span className="text-muted-foreground text-sm animate-pulse">
         Loading…
       </span>
     </div>

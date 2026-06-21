@@ -14,24 +14,24 @@ export default function LoginPage() {
   }, [token, navigate]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[--color-background]">
-      <div className="flex flex-col items-center gap-8 p-10 rounded-xl border border-[--color-border] bg-[--color-card] shadow-2xl w-full max-w-sm">
+    <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="flex flex-col items-center gap-8 p-10 rounded-xl border border-border bg-card shadow-2xl w-full max-w-sm">
         <div className="flex flex-col items-center gap-2">
           <span className="text-4xl font-black tracking-tight text-white">
             CRASH
           </span>
-          <span className="text-sm text-[--color-muted-foreground] tracking-widest uppercase">
+          <span className="text-sm text-muted-foreground tracking-widest uppercase">
             Jungle Gaming
           </span>
         </div>
 
-        <p className="text-sm text-[--color-muted-foreground] text-center">
+        <p className="text-sm text-muted-foreground text-center">
           Sign in with your account to play.
         </p>
 
         <button
           onClick={() => login()}
-          className="w-full py-3 rounded-lg bg-[--color-primary] text-white font-semibold text-sm hover:opacity-90 transition-opacity"
+          className="w-full py-3 rounded-lg bg-primary text-white font-semibold text-sm hover:opacity-90 transition-opacity"
         >
           Sign in with Keycloak
         </button>

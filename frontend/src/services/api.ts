@@ -50,11 +50,12 @@ export interface RoundDto {
   id: string;
   status: RoundStatus;
   serverSeedHash: string;
-  serverSeed?: string;
-  crashPoint?: number;
   nonce: number;
+  bettingEndsAt: string;
+  startedAt: string | null;
+  crashedAt: string | null;
+  crashPointMultiplier: number | null;
   bets: BetDto[];
-  createdAt: string;
 }
 
 export interface PaginatedRoundsDto {
