@@ -1,6 +1,12 @@
 _format_version: "3.0"
 
 plugins:
+  - name: rate-limiting
+    config:
+      minute: 120
+      policy: local
+      error_message: "Too many requests"
+
   - name: cors
     config:
       origins:

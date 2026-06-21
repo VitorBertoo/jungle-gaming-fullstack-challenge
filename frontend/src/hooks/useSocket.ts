@@ -53,6 +53,8 @@ export function useSocket() {
           roundId: r.id,
           crashPointMultiplier: r.crashPointMultiplier ?? 0,
           crashedAt: r.crashedAt ?? "",
+          serverSeedHash: r.serverSeedHash,
+          nonce: r.nonce,
         }));
 
         syncFromApi(round, history);

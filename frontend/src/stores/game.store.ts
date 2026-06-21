@@ -18,6 +18,9 @@ export interface HistoryEntry {
   roundId: string;
   crashPointMultiplier: number;
   crashedAt: string;
+  serverSeedHash: string;
+  serverSeed?: string;
+  nonce: number;
 }
 
 // Payloads matching what the gateway emits
@@ -186,6 +189,9 @@ export const useGameStore = create<GameState>()((set) => ({
           roundId: p.roundId,
           crashPointMultiplier: p.crashPointMultiplier,
           crashedAt: p.crashedAt,
+          serverSeedHash: p.serverSeedHash,
+          serverSeed: p.serverSeed,
+          nonce: p.nonce,
         },
         ...s.history,
       ].slice(0, 20),
