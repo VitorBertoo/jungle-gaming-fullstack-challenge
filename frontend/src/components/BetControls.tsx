@@ -13,6 +13,16 @@ export function BetControls() {
   const [toast, setToast] = useState<{ msg: string; type: "error" | "success" } | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // ── Auto settings ────────────────────────────────────────────────────────
+  const [autoBetEnabled, setAutoBetEnabled] = useState(false);
+  const [autoCashoutEnabled, setAutoCashoutEnabled] = useState(false);
+  const [autoCashoutTargetStr, setAutoCashoutTargetStr] = useState("2.00");
+
+  // Tracks the roundId we last auto-bet in — prevents firing twice per round
+  const autoBetFiredRoundRef = useRef<string | null>(null);
+  // Tracks the roundId we last auto-cashed-out in — prevents firing twice per round
+  const autoCashoutFiredRoundRef = useRef<string | null>(null);
+
   const roundStatus = useGameStore((s) => s.roundStatus);
   const currentMultiplier = useGameStore((s) => s.currentMultiplier);
   const bettingEndsAt = useGameStore((s) => s.bettingEndsAt);
@@ -61,14 +71,55 @@ export function BetControls() {
     setToast(null);
   }, [roundId]);
 
+  const amountCents = Math.round(parseFloat(amountStr || "0") * 100);
+  const isValidAmount = !isNaN(amountCents) && amountCents >= MIN_CENTS && amountCents <= MAX_CENTS;
+
+  // ── Auto Bet ─────────────────────────────────────────────────────────────
+  // Fires once at the start of each BETTING phase when enabled.
+  useEffect(() => {
+    if (!autoBetEnabled) return;
+    if (roundStatus !== "BETTING" || !roundId) return;
+    if (autoBetFiredRoundRef.current === roundId) return; // already fired this round
+    if (myBet) return;        // already have an active bet
+    if (!isValidAmount) return;
+
+    autoBetFiredRoundRef.current = roundId;
+    // Small delay so the BETTING state fully settles before sending the request
+    const t = setTimeout(() => {
+      placeBet(amountCents, {
+        onError: (err) =>
+          showToast(err instanceof Error ? err.message : "Auto bet failed", "error"),
+      });
+    }, 300);
+    return () => clearTimeout(t);
+  }, [autoBetEnabled, roundStatus, roundId, myBet, isValidAmount, amountCents, placeBet]);
+
+  // ── Auto Cashout ─────────────────────────────────────────────────────────
+  // Fires once per round when the multiplier crosses the configured target.
+  useEffect(() => {
+    if (!autoCashoutEnabled) return;
+    if (roundStatus !== "RUNNING" || !roundId || !myBet || isCashingOut) return;
+    if (autoCashoutFiredRoundRef.current === roundId) return; // already fired this round
+
+    const target = Math.round(parseFloat(autoCashoutTargetStr) * 100);
+    if (isNaN(target) || target < 101) return; // target must be > 1.00x
+
+    if (currentMultiplier >= target) {
+      autoCashoutFiredRoundRef.current = roundId;
+      cashout(undefined, {
+        onSuccess: () =>
+          showToast(`Auto cashed out at ${formatMultiplier(currentMultiplier)}!`, "success"),
+        onError: (err) =>
+          showToast(err instanceof Error ? err.message : "Auto cashout failed", "error"),
+      });
+    }
+  }, [autoCashoutEnabled, currentMultiplier, roundStatus, roundId, myBet, isCashingOut, autoCashoutTargetStr, cashout]);
+
   function showToast(msg: string, type: "error" | "success") {
     if (toastTimer.current) clearTimeout(toastTimer.current);
     setToast({ msg, type });
     toastTimer.current = setTimeout(() => setToast(null), 3500);
   }
-
-  const amountCents = Math.round(parseFloat(amountStr || "0") * 100);
-  const isValidAmount = !isNaN(amountCents) && amountCents >= MIN_CENTS && amountCents <= MAX_CENTS;
 
   const canBet = roundStatus === "BETTING" && !myBet && isValidAmount && !isPlacingBet;
   const canCashout = roundStatus === "RUNNING" && !!myBet && !isCashingOut;
@@ -252,6 +303,63 @@ export function BetControls() {
                 ? `Won ${formatCents(BigInt(myBet.payoutInCents ?? "0"))}`
                 : "Lost"}
             </span>
+          )}
+        </div>
+      </div>
+
+      {/* ── Auto Controls ─────────────────────────────────────────────────── */}
+      <div className="mt-3 pt-3 border-t border-border flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+        <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider shrink-0">
+          Auto
+        </span>
+
+        {/* Auto Bet toggle */}
+        <label className="flex items-center gap-2 cursor-pointer select-none">
+          <input
+            type="checkbox"
+            checked={autoBetEnabled}
+            onChange={(e) => setAutoBetEnabled(e.target.checked)}
+            className="w-4 h-4 accent-primary"
+          />
+          <span className={cn("text-sm", autoBetEnabled ? "text-foreground font-medium" : "text-muted-foreground")}>
+            Auto Bet
+          </span>
+          {autoBetEnabled && (
+            <span className="text-xs text-primary animate-pulse">ON</span>
+          )}
+        </label>
+
+        {/* Auto Cashout toggle + target */}
+        <label className="flex items-center gap-2 cursor-pointer select-none">
+          <input
+            type="checkbox"
+            checked={autoCashoutEnabled}
+            onChange={(e) => setAutoCashoutEnabled(e.target.checked)}
+            className="w-4 h-4 accent-primary"
+          />
+          <span className={cn("text-sm", autoCashoutEnabled ? "text-foreground font-medium" : "text-muted-foreground")}>
+            Auto Cashout at
+          </span>
+        </label>
+        <div className="flex items-center gap-1">
+          <input
+            type="text"
+            inputMode="decimal"
+            value={autoCashoutTargetStr}
+            onChange={(e) => {
+              const v = e.target.value;
+              if (/^\d*\.?\d{0,2}$/.test(v)) setAutoCashoutTargetStr(v);
+            }}
+            disabled={!autoCashoutEnabled}
+            className={cn(
+              "w-20 px-2 py-1 rounded-lg border text-sm font-mono bg-background text-foreground",
+              "focus:outline-none focus:ring-2 focus:ring-primary transition-colors",
+              !autoCashoutEnabled ? "opacity-40 cursor-not-allowed" : "border-border",
+            )}
+          />
+          <span className="text-sm text-muted-foreground">×</span>
+          {autoCashoutEnabled && (
+            <span className="text-xs text-primary animate-pulse">ON</span>
           )}
         </div>
       </div>

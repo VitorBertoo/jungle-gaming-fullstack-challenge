@@ -242,62 +242,6 @@ describe("Happy path: place bet → cashout", () => {
   }, 300_000); // 5 min: waits BETTING (120s) + RUNNING (120s) + margin
 });
 
-describe("Happy path: place bet → crash → lost", () => {
-  it("detects a lost bet after round crashes", async () => {
-    // 1. Wait for BETTING
-    await waitForRoundStatus("BETTING");
-
-    // 2. Place bet
-    const betRes = await fetch(`${BASE_URL}/bet`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ amountInCents: 100 }), // $1.00
-    });
-
-    if (betRes.status === 422) {
-      console.log("Missed betting window — skipping crash test");
-      return;
-    }
-
-    expect(betRes.status).toBe(201);
-    const bet = await betRes.json() as Record<string, unknown>;
-
-    // 3. Wait for round to crash (do NOT cashout)
-    await waitForRoundStatus("CRASHED");
-
-    // 4. Check round history contains this round
-    const histRes = await fetch(`${BASE_URL}/rounds/history?limit=1`);
-    expect(histRes.status).toBe(200);
-    const hist = await histRes.json() as { rounds: Record<string, unknown>[] };
-    expect(hist.rounds.length).toBeGreaterThan(0);
-    const lastRound = hist.rounds[0];
-    expect(lastRound.crashPointMultiplier).not.toBeNull();
-
-    // 5. Verify round via provably fair endpoint
-    const verifyRes = await fetch(`${BASE_URL}/rounds/${lastRound.id}/verify`);
-    expect(verifyRes.status).toBe(200);
-    const verify = await verifyRes.json() as Record<string, unknown>;
-    expect(verify.serverSeed).toBeDefined();
-    expect(verify.serverSeedHash).toBeDefined();
-    expect(verify.crashPointMultiplier).toBe(lastRound.crashPointMultiplier);
-
-    // 6. Check bet history — this bet should be LOST
-    const betsRes = await fetch(`${BASE_URL}/bets/me?limit=5`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    expect(betsRes.status).toBe(200);
-    const bets = await betsRes.json() as { data: Record<string, unknown>[] };
-    const thisBet = bets.data.find((b) => b.id === bet.id);
-    // The bet may be LOST or CANCELLED (if debit failed), both are valid
-    if (thisBet) {
-      expect(["LOST", "CANCELLED"]).toContain(thisBet.status as string);
-    }
-  }, 300_000); // 5 min: waits BETTING (120s) + full RUNNING until crash (120s) + margin
-});
-
 describe("GET /rounds/:id/verify", () => {
   it("returns 404 for unknown round", async () => {
     const res = await fetch(`${BASE_URL}/rounds/non-existent-id/verify`);

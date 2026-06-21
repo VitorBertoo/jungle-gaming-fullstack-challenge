@@ -258,3 +258,5 @@ A curva de crash é renderizada em um Canvas HTML5 via loop `requestAnimationFra
 - **Copiar para área de transferência** nos valores de seed
 - **`bun run env:init`** — Copia `.env.example` → `.env` automaticamente no `docker:up`
 - **Toast de falha no débito** — O frontend exibe o motivo quando uma aposta é cancelada por saldo insuficiente
+- **Auto Bet** — Ativa apostas automáticas no início de cada rodada usando o valor configurado no input
+- **Auto Cashout** — Saca automaticamente quando o multiplicador atinge o alvo configurado (ex.: 2.00×); dispara no máximo uma vez por rodada
