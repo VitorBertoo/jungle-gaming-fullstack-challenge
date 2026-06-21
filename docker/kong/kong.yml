@@ -17,6 +17,7 @@ plugins:
         - Authorization
         - Content-Type
         - Accept
+        - x-admin-key
       exposed_headers:
         - Authorization
       credentials: true

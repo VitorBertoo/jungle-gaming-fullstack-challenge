@@ -4,6 +4,7 @@ import { useAuthInit } from "@/hooks/useAuthInit";
 import LoginPage from "@/pages/LoginPage";
 import CallbackPage from "@/pages/CallbackPage";
 import GamePage from "@/pages/GamePage";
+import AdminPage from "@/pages/AdminPage";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const token = useAuthStore((s) => s.accessToken);
@@ -38,6 +39,7 @@ export default function App() {
           </ProtectedRoute>
         }
       />
+      <Route path="/admin" element={<AdminPage />} />
       <Route path="*" element={<Navigate to="/game" replace />} />
     </Routes>
   );

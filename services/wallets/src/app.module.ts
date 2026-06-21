@@ -2,6 +2,7 @@ import { Module } from "@nestjs/common";
 import { PassportModule } from "@nestjs/passport";
 import { ClientsModule, Transport } from "@nestjs/microservices";
 import { WalletsController } from "./presentation/controllers/wallets.controller";
+import { AdminController } from "./presentation/controllers/admin.controller";
 import { PrismaService } from "./infrastructure/prisma/prisma.service";
 import { PrismaWalletRepository } from "./infrastructure/prisma/prisma-wallet.repository";
 import { JwtStrategy } from "./infrastructure/auth/jwt.strategy";
@@ -10,6 +11,8 @@ import { CreateWalletUseCase } from "./application/use-cases/create-wallet.use-c
 import { GetWalletUseCase } from "./application/use-cases/get-wallet.use-case";
 import { DebitWalletUseCase } from "./application/use-cases/debit-wallet.use-case";
 import { CreditWalletUseCase } from "./application/use-cases/credit-wallet.use-case";
+import { GetAllWalletsUseCase } from "./application/use-cases/get-all-wallets.use-case";
+import { KeycloakAdminService } from "./infrastructure/keycloak/keycloak-admin.service";
 import { WALLET_REPOSITORY } from "./domain/wallet.repository.interface";
 
 @Module({
@@ -27,7 +30,7 @@ import { WALLET_REPOSITORY } from "./domain/wallet.repository.interface";
       },
     ]),
   ],
-  controllers: [WalletsController, WalletEventsConsumer],
+  controllers: [WalletsController, AdminController, WalletEventsConsumer],
   providers: [
     PrismaService,
     JwtStrategy,
@@ -39,6 +42,8 @@ import { WALLET_REPOSITORY } from "./domain/wallet.repository.interface";
     GetWalletUseCase,
     DebitWalletUseCase,
     CreditWalletUseCase,
+    GetAllWalletsUseCase,
+    KeycloakAdminService,
   ],
 })
 export class AppModule {}

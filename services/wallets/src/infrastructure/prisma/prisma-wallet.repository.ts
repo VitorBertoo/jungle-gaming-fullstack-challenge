@@ -22,6 +22,21 @@ export class PrismaWalletRepository implements IWalletRepository {
     });
   }
 
+  async findAll(): Promise<Wallet[]> {
+    const records = await this.prisma.wallet.findMany({
+      orderBy: { createdAt: "asc" },
+    });
+    return records.map((record: { id: string; playerId: string; balanceInCents: bigint; createdAt: Date; updatedAt: Date }) =>
+      Wallet.reconstitute({
+        id: record.id,
+        playerId: record.playerId,
+        balanceInCents: record.balanceInCents,
+        createdAt: record.createdAt,
+        updatedAt: record.updatedAt,
+      }),
+    );
+  }
+
   async save(wallet: Wallet): Promise<void> {
     await this.prisma.wallet.upsert({
       where: { playerId: wallet.playerId },

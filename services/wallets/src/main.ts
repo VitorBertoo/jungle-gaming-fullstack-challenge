@@ -7,6 +7,11 @@ import { AppModule } from "./app.module";
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
 
+  app.enableCors({
+    origin: true,
+    allowedHeaders: ["Content-Type", "Authorization", "x-admin-key"],
+  });
+
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.RMQ,
     options: {
@@ -28,6 +33,7 @@ async function bootstrap(): Promise<void> {
     .addServer("http://localhost:8000/wallets", "Kong API Gateway")
     .addServer("http://localhost:4002", "Direct")
     .addBearerAuth()
+    .addApiKey({ type: "apiKey", in: "header", name: "x-admin-key" }, "x-admin-key")
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
