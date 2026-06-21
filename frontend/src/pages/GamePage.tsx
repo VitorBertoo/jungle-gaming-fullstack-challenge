@@ -7,6 +7,8 @@ import { walletApi } from "@/services/api";
 import { formatCents, cn } from "@/lib/utils";
 import { CrashGraph } from "@/components/CrashGraph";
 import { BetControls } from "@/components/BetControls";
+import { RoundHistory } from "@/components/RoundHistory";
+import { LiveBetsList } from "@/components/LiveBetsList";
 
 export default function GamePage() {
   const username = useAuthStore((s) => s.username);
@@ -88,27 +90,23 @@ export default function GamePage() {
 
         {/* Right sidebar */}
         <aside className="hidden lg:flex flex-col w-72 border-l border-border bg-card shrink-0">
-          {/* Round history — top half */}
-          <div className="flex-1 border-b border-border overflow-hidden flex flex-col">
-            <p className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
+          {/* Round history — top third */}
+          <div className="flex flex-col border-b border-border" style={{ height: "35%" }}>
+            <p className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border shrink-0">
               Round History
             </p>
-            <div className="flex-1 overflow-y-auto p-3">
-              <p className="text-muted-foreground text-xs text-center mt-4">
-                History — step 6
-              </p>
+            <div className="flex-1 overflow-hidden">
+              <RoundHistory />
             </div>
           </div>
 
-          {/* Live bets — bottom half */}
-          <div className="flex-1 overflow-hidden flex flex-col">
-            <p className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
+          {/* Live bets — bottom two-thirds */}
+          <div className="flex flex-col flex-1 overflow-hidden">
+            <p className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border shrink-0">
               Live Bets
             </p>
-            <div className="flex-1 overflow-y-auto p-3">
-              <p className="text-muted-foreground text-xs text-center mt-4">
-                Bets — step 6
-              </p>
+            <div className="flex-1 overflow-hidden">
+              <LiveBetsList />
             </div>
           </div>
         </aside>

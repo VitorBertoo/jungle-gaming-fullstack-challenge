@@ -59,7 +59,7 @@ describe("Wallet", () => {
       expect(() => wallet.debit(1001n)).toThrow(InsufficientBalanceError);
     });
 
-    it("InsufficientBalanceError message contains balance and required amount", () => {
+    it("InsufficientBalanceError message contains formatted balance and required amount", () => {
       let error: Error | null = null;
       try {
         wallet.debit(9999n);
@@ -67,8 +67,9 @@ describe("Wallet", () => {
         error = err as Error;
       }
       expect(error).not.toBeNull();
-      expect(error!.message).toContain("1000");
-      expect(error!.message).toContain("9999");
+      // balance is $10.00 (1000 cents), required is $99.99 (9999 cents)
+      expect(error!.message).toContain("$10.00");
+      expect(error!.message).toContain("$99.99");
     });
 
     it("throws on zero amount", () => {
