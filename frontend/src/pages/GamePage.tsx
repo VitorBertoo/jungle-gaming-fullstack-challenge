@@ -3,6 +3,7 @@ import { useWallet } from "@/hooks/useWallet";
 import { useSocket } from "@/hooks/useSocket";
 import { logout } from "@/services/auth.service";
 import { formatCents } from "@/lib/utils";
+import { CrashGraph } from "@/components/CrashGraph";
 
 export default function GamePage() {
   const username = useAuthStore((s) => s.username);
@@ -18,11 +19,11 @@ export default function GamePage() {
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       {/* Header */}
-      <header className="flex items-center justify-between px-6 py-4 border-b border-border bg-card">
+      <header className="flex items-center justify-between px-6 py-3 border-b border-border bg-card shrink-0">
         <div className="flex items-center gap-2">
           <span className="font-black text-lg tracking-tight text-white">CRASH</span>
           <span
-            className={`w-2 h-2 rounded-full ${connected ? "bg-accent" : "bg-muted-foreground"}`}
+            className={`w-2 h-2 rounded-full transition-colors ${connected ? "bg-accent" : "bg-muted-foreground"}`}
             title={connected ? "Live" : "Connecting…"}
           />
         </div>
@@ -44,12 +45,47 @@ export default function GamePage() {
         </div>
       </header>
 
-      {/* Main — to be filled in Step 5/6 */}
-      <main className="flex-1 flex items-center justify-center">
-        <p className="text-muted-foreground text-sm">
-          Game UI coming in next steps…
-        </p>
-      </main>
+      {/* Main content */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Graph — left / top on mobile */}
+        <div className="flex flex-col flex-1 min-w-0">
+          <div className="relative flex-1 min-h-0">
+            <CrashGraph />
+          </div>
+
+          {/* Bet controls — step 6 */}
+          <div className="shrink-0 h-32 border-t border-border bg-card flex items-center justify-center">
+            <p className="text-muted-foreground text-sm">Bet controls — coming next</p>
+          </div>
+        </div>
+
+        {/* Right sidebar */}
+        <aside className="hidden lg:flex flex-col w-72 border-l border-border bg-card shrink-0">
+          {/* Round history — top half */}
+          <div className="flex-1 border-b border-border overflow-hidden flex flex-col">
+            <p className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
+              Round History
+            </p>
+            <div className="flex-1 overflow-y-auto p-3">
+              <p className="text-muted-foreground text-xs text-center mt-4">
+                History — step 6
+              </p>
+            </div>
+          </div>
+
+          {/* Live bets — bottom half */}
+          <div className="flex-1 overflow-hidden flex flex-col">
+            <p className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
+              Live Bets
+            </p>
+            <div className="flex-1 overflow-y-auto p-3">
+              <p className="text-muted-foreground text-xs text-center mt-4">
+                Bets — step 6
+              </p>
+            </div>
+          </div>
+        </aside>
+      </div>
     </div>
   );
 }
