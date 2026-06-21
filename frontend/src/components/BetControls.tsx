@@ -36,7 +36,6 @@ export function BetControls() {
     return () => clearInterval(id);
   }, [bettingEndsAt]);
 
-  // Clear my local bet tracking when round changes
   const myBet = bets.find(
     (b) =>
       b.playerId === playerId &&
@@ -101,17 +100,18 @@ export function BetControls() {
   }
 
   function handleAmountChange(val: string) {
-    // Allow digits and at most one dot
     if (/^\d*\.?\d{0,2}$/.test(val)) setAmountStr(val);
   }
 
+  const inputDisabled = roundStatus === "RUNNING" && !!myBet;
+
   return (
-    <div className="relative flex flex-col gap-3 px-4 py-3 h-full justify-center">
+    <div className="relative px-4 py-3">
       {/* Toast */}
       {toast && (
         <div
           className={cn(
-            "absolute top-2 left-1/2 -translate-x-1/2 px-4 py-2 rounded-lg text-sm font-medium shadow-lg z-10 transition-all",
+            "absolute top-2 left-1/2 -translate-x-1/2 px-4 py-2 rounded-lg text-sm font-medium shadow-lg z-10 whitespace-nowrap",
             toast.type === "error"
               ? "bg-destructive text-white"
               : "bg-accent text-black",
@@ -121,14 +121,16 @@ export function BetControls() {
         </div>
       )}
 
-      <div className="flex items-center gap-3">
-        {/* Amount input */}
+      {/* Mobile: flex-col · Desktop: flex-row */}
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+
+        {/* Amount input + quick amounts */}
         <div className="flex flex-col gap-1 min-w-0">
           <label className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
             Bet Amount
           </label>
-          <div className="flex items-center gap-2">
-            <div className="relative">
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="relative shrink-0">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
                 $
               </span>
@@ -137,14 +139,12 @@ export function BetControls() {
                 inputMode="decimal"
                 value={amountStr}
                 onChange={(e) => handleAmountChange(e.target.value)}
-                disabled={roundStatus === "RUNNING" && !!myBet}
+                disabled={inputDisabled}
                 className={cn(
                   "w-28 pl-7 pr-3 py-2 rounded-lg border text-sm font-mono bg-background text-foreground",
                   "focus:outline-none focus:ring-2 focus:ring-primary transition-colors",
-                  !isValidAmount && amountStr !== ""
-                    ? "border-destructive"
-                    : "border-border",
-                  roundStatus === "RUNNING" && myBet ? "opacity-50 cursor-not-allowed" : "",
+                  !isValidAmount && amountStr !== "" ? "border-destructive" : "border-border",
+                  inputDisabled ? "opacity-50 cursor-not-allowed" : "",
                 )}
               />
             </div>
@@ -155,7 +155,7 @@ export function BetControls() {
                 <button
                   key={d}
                   onClick={() => setQuickAmount(d)}
-                  disabled={roundStatus === "RUNNING" && !!myBet}
+                  disabled={inputDisabled}
                   className="px-2 py-1 rounded text-xs border border-border text-muted-foreground
                     hover:border-primary hover:text-white transition-colors disabled:opacity-40"
                 >
@@ -169,14 +169,14 @@ export function BetControls() {
           </span>
         </div>
 
-        {/* Spacer */}
-        <div className="flex-1" />
+        {/* Desktop spacer */}
+        <div className="hidden sm:block flex-1" />
 
         {/* Action area */}
-        <div className="flex flex-col items-end gap-1 shrink-0">
-          {/* Payout preview while running with active bet */}
+        <div className="flex flex-col gap-1 sm:items-end">
+          {/* Payout preview */}
           {potentialPayout !== null && (
-            <div className="text-right">
+            <div className="text-left sm:text-right">
               <span className="text-xs text-muted-foreground">Potential payout </span>
               <span className="text-sm font-bold text-accent">
                 {formatCents(potentialPayout)}
@@ -187,7 +187,7 @@ export function BetControls() {
             </div>
           )}
 
-          {/* Countdown during betting */}
+          {/* Countdown */}
           {roundStatus === "BETTING" && secsLeft > 0 && (
             <span className="text-xs text-muted-foreground">
               Betting closes in{" "}
@@ -201,7 +201,7 @@ export function BetControls() {
               onClick={handleBet}
               disabled={!canBet}
               className={cn(
-                "px-8 py-3 rounded-xl font-bold text-sm transition-all",
+                "w-full sm:w-auto px-8 py-3 rounded-xl font-bold text-sm transition-all",
                 canBet
                   ? "bg-primary text-white hover:opacity-90 active:scale-95"
                   : "bg-muted text-muted-foreground cursor-not-allowed opacity-60",
@@ -217,7 +217,7 @@ export function BetControls() {
               onClick={handleCashout}
               disabled={!canCashout}
               className={cn(
-                "px-8 py-3 rounded-xl font-bold text-sm transition-all",
+                "w-full sm:w-auto px-8 py-3 rounded-xl font-bold text-sm transition-all",
                 canCashout
                   ? "bg-accent text-black hover:opacity-90 active:scale-95 animate-pulse"
                   : "bg-muted text-muted-foreground cursor-not-allowed opacity-60",
@@ -231,14 +231,14 @@ export function BetControls() {
             </button>
           )}
 
-          {/* Status when bet is active but round not yet running */}
+          {/* Status: bet placed, waiting */}
           {myBet && roundStatus === "BETTING" && (
             <span className="text-xs text-muted-foreground italic">
               Bet placed — waiting for round to start
             </span>
           )}
 
-          {/* Lost / cashed out indicator */}
+          {/* Lost / won result */}
           {myBet && roundStatus === "CRASHED" && (
             <span
               className={cn(
