@@ -18,6 +18,8 @@ export function BetControls() {
   const bettingEndsAt = useGameStore((s) => s.bettingEndsAt);
   const bets = useGameStore((s) => s.bets);
   const roundId = useGameStore((s) => s.roundId);
+  const debitFailed = useGameStore((s) => s.debitFailed);
+  const clearDebitFailed = useGameStore((s) => s.clearDebitFailed);
 
   const playerId = useAuthStore((s) => s.playerId);
 
@@ -41,12 +43,19 @@ export function BetControls() {
       (b.status === "PENDING_DEBIT" || b.status === "ACTIVE"),
   );
 
-  // Show toast on errors
+  // Show toast on REST errors
   useEffect(() => {
     const err = placeBetError ?? cashoutError;
     if (!err) return;
     showToast(err instanceof Error ? err.message : "Something went wrong", "error");
   }, [placeBetError, cashoutError]);
+
+  // Show toast when wallet debit fails (async, via WebSocket)
+  useEffect(() => {
+    if (!debitFailed || debitFailed.playerId !== playerId) return;
+    showToast(debitFailed.reason ?? "Insufficient balance", "error");
+    clearDebitFailed();
+  }, [debitFailed, playerId, clearDebitFailed]);
 
   // Clear toast on round change
   useEffect(() => {

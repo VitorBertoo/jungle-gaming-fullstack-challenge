@@ -61,6 +61,12 @@ export interface RoundCrashedPayload {
   crashedAt: string;
 }
 
+export interface BetCancelledPayload {
+  betId: string;
+  playerId: string;
+  reason: string;
+}
+
 interface GameState {
   roundId: string | null;
   roundStatus: RoundStatus | null;
@@ -76,6 +82,9 @@ interface GameState {
   bets: LiveBet[];
   history: HistoryEntry[];
 
+  /** Set when the wallet debit for our bet fails — cleared by BetControls after showing toast */
+  debitFailed: BetCancelledPayload | null;
+
   // Event handlers (called by useSocket)
   onRoundBetting: (p: RoundBettingPayload) => void;
   onRoundStarted: (p: RoundStartedPayload) => void;
@@ -83,6 +92,8 @@ interface GameState {
   onBetPlaced: (p: BetPlacedPayload) => void;
   onBetCashout: (p: BetCashoutPayload) => void;
   onRoundCrashed: (p: RoundCrashedPayload) => void;
+  onBetCancelled: (p: BetCancelledPayload) => void;
+  clearDebitFailed: () => void;
 
   /** Sync state from REST API on initial load or reconnect */
   syncFromApi: (round: RoundDto | null, history: HistoryEntry[]) => void;
@@ -100,6 +111,7 @@ export const useGameStore = create<GameState>()((set) => ({
   currentMultiplier: 100,
   bets: [],
   history: [],
+  debitFailed: null,
 
   onRoundBetting: (p) =>
     set({
@@ -175,6 +187,14 @@ export const useGameStore = create<GameState>()((set) => ({
         ...s.history,
       ].slice(0, 20),
     })),
+
+  onBetCancelled: (p) =>
+    set((s) => ({
+      debitFailed: p,
+      bets: s.bets.filter((b) => b.betId !== p.betId),
+    })),
+
+  clearDebitFailed: () => set({ debitFailed: null }),
 
   syncFromApi: (round, history) => {
     set({

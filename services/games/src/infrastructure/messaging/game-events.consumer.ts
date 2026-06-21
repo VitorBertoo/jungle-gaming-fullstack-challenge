@@ -2,6 +2,7 @@ import { Controller, Inject, Logger } from "@nestjs/common";
 import { EventPattern, Payload } from "@nestjs/microservices";
 import type { IRoundRepository } from "@/domain/round/round.repository.interface";
 import { ROUND_REPOSITORY } from "@/domain/round/round.repository.interface";
+import { GameGateway } from "@/infrastructure/websocket/game.gateway";
 import { BetStatus } from "@/domain/round/bet-status.enum";
 
 interface WalletDebitedPayload {
@@ -35,6 +36,7 @@ export class GameEventsConsumer {
   constructor(
     @Inject(ROUND_REPOSITORY)
     private readonly roundRepository: IRoundRepository,
+    private readonly gateway: GameGateway,
   ) {}
 
   @EventPattern("wallet.debited")
@@ -54,7 +56,7 @@ export class GameEventsConsumer {
 
   @EventPattern("wallet.debit.failed")
   async onWalletDebitFailed(@Payload() payload: WalletDebitFailedPayload): Promise<void> {
-    const { betId, roundId, reason } = payload;
+    const { betId, roundId, playerId, reason } = payload;
     this.logger.warn(`Wallet debit failed: betId=${betId} reason=${reason}`);
 
     const round = await this.roundRepository.findById(roundId);
@@ -65,6 +67,9 @@ export class GameEventsConsumer {
 
     bet.cancelDebit();
     await this.roundRepository.saveBet(bet);
+
+    // Notify the player in real-time so the UI can surface the error
+    this.gateway.emitBetCancelled(betId, playerId, reason);
   }
 
   @EventPattern("wallet.credited")

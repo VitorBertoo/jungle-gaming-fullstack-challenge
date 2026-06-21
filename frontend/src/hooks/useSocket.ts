@@ -25,6 +25,7 @@ export function useSocket() {
     onBetPlaced,
     onBetCashout,
     onRoundCrashed,
+    onBetCancelled,
     syncFromApi,
   } = useGameStore();
 
@@ -75,6 +76,7 @@ export function useSocket() {
     socket.on("bet:placed", onBetPlaced);
     socket.on("bet:cashout", onBetCashout);
     socket.on("round:crashed", onRoundCrashed);
+    socket.on("bet:cancelled", onBetCancelled);
 
     return () => {
       socket.disconnect();

@@ -81,4 +81,8 @@ export class GameGateway implements OnGatewayInit {
       crashedAt: round.crashedAt!.toISOString(),
     });
   }
+
+  emitBetCancelled(betId: string, playerId: string, reason: string): void {
+    this.server.emit("bet:cancelled", { betId, playerId, reason });
+  }
 }
