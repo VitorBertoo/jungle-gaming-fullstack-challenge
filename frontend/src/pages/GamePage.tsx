@@ -1,8 +1,10 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuthStore } from "@/stores/auth.store";
-import { useWallet } from "@/hooks/useWallet";
+import { useWallet, WALLET_QUERY_KEY } from "@/hooks/useWallet";
 import { useSocket } from "@/hooks/useSocket";
 import { logout } from "@/services/auth.service";
-import { formatCents } from "@/lib/utils";
+import { walletApi } from "@/services/api";
+import { formatCents, cn } from "@/lib/utils";
 import { CrashGraph } from "@/components/CrashGraph";
 import { BetControls } from "@/components/BetControls";
 
@@ -10,6 +12,12 @@ export default function GamePage() {
   const username = useAuthStore((s) => s.username);
   const { data: wallet, isLoading: walletLoading } = useWallet();
   const { connected } = useSocket();
+  const queryClient = useQueryClient();
+
+  const topup = useMutation({
+    mutationFn: () => walletApi.topup(),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: WALLET_QUERY_KEY }),
+  });
 
   const balanceDisplay = wallet
     ? formatCents(BigInt(wallet.balanceInCents))
@@ -28,15 +36,33 @@ export default function GamePage() {
             title={connected ? "Live" : "Connecting…"}
           />
         </div>
-        <div className="flex items-center gap-6">
+
+        <div className="flex items-center gap-5">
           <div className="text-right">
             <p className="text-xs text-muted-foreground uppercase tracking-wider">Balance</p>
-            <p className="text-base font-bold text-accent">{balanceDisplay}</p>
+            <div className="flex items-center gap-2">
+              <p className="text-base font-bold text-accent">{balanceDisplay}</p>
+              <button
+                onClick={() => topup.mutate()}
+                disabled={topup.isPending}
+                title="Add $1,000"
+                className={cn(
+                  "text-xs px-2 py-0.5 rounded border transition-colors",
+                  topup.isPending
+                    ? "border-border text-muted-foreground cursor-not-allowed"
+                    : "border-primary text-primary hover:bg-primary hover:text-white",
+                )}
+              >
+                {topup.isPending ? "…" : "+ $1k"}
+              </button>
+            </div>
           </div>
+
           <div className="text-right">
             <p className="text-xs text-muted-foreground uppercase tracking-wider">Player</p>
             <p className="text-sm font-semibold">{username ?? "—"}</p>
           </div>
+
           <button
             onClick={() => logout()}
             className="text-xs text-muted-foreground hover:text-white transition-colors"

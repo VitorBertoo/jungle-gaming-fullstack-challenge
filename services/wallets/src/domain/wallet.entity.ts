@@ -17,9 +17,9 @@ export class Wallet {
     private _updatedAt: Date,
   ) {}
 
-  static create(id: string, playerId: string): Wallet {
+  static create(id: string, playerId: string, initialBalanceInCents = 0n): Wallet {
     const now = new Date();
-    return new Wallet(id, playerId, 0n, now, now);
+    return new Wallet(id, playerId, initialBalanceInCents, now, now);
   }
 
   static reconstitute(props: WalletProps): Wallet {

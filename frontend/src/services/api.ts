@@ -23,6 +23,8 @@ export interface WalletDto {
 export const walletApi = {
   getMe: () => api.get<WalletDto>("/wallets/me").then((r) => r.data),
   create: () => api.post<WalletDto>("/wallets").then((r) => r.data),
+  topup: (amountInCents = 100_000) =>
+    api.post<WalletDto>("/wallets/topup", { amountInCents }).then((r) => r.data),
 };
 
 // --- Game ---

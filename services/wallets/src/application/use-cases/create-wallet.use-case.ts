@@ -18,7 +18,7 @@ export class CreateWalletUseCase {
       throw new WalletAlreadyExistsError(playerId);
     }
 
-    const wallet = Wallet.create(randomUUID(), playerId);
+    const wallet = Wallet.create(randomUUID(), playerId, 100_000n);
     await this.walletRepository.save(wallet);
     return wallet;
   }
