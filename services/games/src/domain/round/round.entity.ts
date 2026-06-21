@@ -98,7 +98,9 @@ export class Round {
       throw new InvalidBetAmountError(amountInCents);
     }
 
-    const existing = this._bets.find((b) => b.playerId === playerId);
+    const existing = this._bets.find(
+      (b) => b.playerId === playerId && b.status !== BetStatus.CANCELLED,
+    );
     if (existing) {
       throw new BetAlreadyPlacedError(playerId);
     }

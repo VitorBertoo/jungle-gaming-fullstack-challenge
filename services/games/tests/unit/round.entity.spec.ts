@@ -59,6 +59,12 @@ describe("Round", () => {
       expect(() => round.placeBet("b2", "player-1", 500n)).toThrow(BetAlreadyPlacedError);
     });
 
+    it("allows a new bet after previous bet was cancelled (e.g. insufficient funds)", () => {
+      const bet = round.placeBet("b1", "player-1", 1000n);
+      bet.cancelDebit();
+      expect(() => round.placeBet("b2", "player-1", 500n)).not.toThrow();
+    });
+
     it("throws RoundNotInBettingPhaseError when RUNNING", () => {
       const running = makeRound(RoundStatus.RUNNING);
       expect(() => running.placeBet("b1", "player-1", 1000n)).toThrow(RoundNotInBettingPhaseError);
